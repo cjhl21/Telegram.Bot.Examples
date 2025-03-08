@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console", "Console\Console.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Webhook.MinimalAPIs", "Webhook.MinimalAPIs\Webhook.MinimalAPIs.csproj", "{5097DB8F-7056-4BD9-9B7B-4FC118F66312}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Haicao.WebApplication", "Haicao.WebApplication\Haicao.WebApplication.csproj", "{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -207,6 +209,22 @@ Global
 		{5097DB8F-7056-4BD9-9B7B-4FC118F66312}.Release|x64.Build.0 = Release|Any CPU
 		{5097DB8F-7056-4BD9-9B7B-4FC118F66312}.Release|x86.ActiveCfg = Release|Any CPU
 		{5097DB8F-7056-4BD9-9B7B-4FC118F66312}.Release|x86.Build.0 = Release|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Debug|ARM.Build.0 = Debug|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Debug|x64.Build.0 = Debug|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Debug|x86.Build.0 = Debug|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Release|ARM.ActiveCfg = Release|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Release|ARM.Build.0 = Release|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Release|x64.ActiveCfg = Release|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Release|x64.Build.0 = Release|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Release|x86.ActiveCfg = Release|Any CPU
+		{F2ECEA65-1547-4FEE-9583-A95E9DE380D6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

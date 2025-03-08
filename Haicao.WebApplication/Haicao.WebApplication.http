@@ -1,0 +1,6 @@
+@Haicao.WebApplication_HostAddress = http://localhost:5080
+
+GET {{Haicao.WebApplication_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
