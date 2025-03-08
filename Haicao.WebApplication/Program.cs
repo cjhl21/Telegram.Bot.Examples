@@ -1,11 +1,13 @@
 
+using Builder = Microsoft.AspNetCore.Builder;
+
 namespace Haicao.WebApplication;
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        var builder = Builder.WebApplication.CreateBuilder(args);
 
         // Add services to the container.
 
