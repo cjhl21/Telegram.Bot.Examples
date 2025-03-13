@@ -8,11 +8,12 @@ namespace Haicao.WebApplication.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class BotController(IOptions<BotConfiguration> Config) : ControllerBase
+public class BotController(ILogger<BotController> logger, IOptions<BotConfiguration> Config) : ControllerBase
 {
     [HttpGet("setWebhook")]
     public async Task<string> SetWebHook([FromServices] ITelegramBotClient bot, CancellationToken ct)
     {
+        logger.LogInformation("invoke SetWebHook");
         var webhookUrl = Config.Value.BotWebhookUrl.AbsoluteUri;
         await bot.SetWebhook(webhookUrl, allowedUpdates: [], secretToken: Config.Value.SecretToken, cancellationToken: ct);
         return $"Webhook set to {webhookUrl}";
@@ -21,6 +22,7 @@ public class BotController(IOptions<BotConfiguration> Config) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Update update, [FromServices] ITelegramBotClient bot, [FromServices] UpdateHandler handleUpdateService, CancellationToken ct)
     {
+        logger.LogWarning("invoke bot Post {Update}", Newtonsoft.Json.JsonConvert.SerializeObject(update));
         if (Request.Headers["X-Telegram-Bot-Api-Secret-Token"] != Config.Value.SecretToken)
             return Forbid();
         try

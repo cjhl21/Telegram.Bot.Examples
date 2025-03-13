@@ -11,6 +11,8 @@ public class Program
     {
         var builder = Builder.WebApplication.CreateBuilder(args);
 
+        builder.Logging.AddLog4Net("CfgFile/log4net.Config");
+        builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
         // Setup bot configuration
         var botConfigSection = builder.Configuration.GetSection("BotConfiguration");
         builder.Services.Configure<BotConfiguration>(botConfigSection);

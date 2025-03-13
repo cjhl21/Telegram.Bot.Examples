@@ -211,6 +211,7 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
     private async Task OnPollAnswer(PollAnswer pollAnswer)
     {
         var answer = pollAnswer.OptionIds.FirstOrDefault();
+        logger.LogInformation("Received Poll info: {U}={A}", pollAnswer.User.Id, answer);
         var selectedOption = PollOptions[answer];
         if (pollAnswer.User != null)
             await bot.SendMessage(pollAnswer.User.Id, $"You've chosen: {selectedOption.Text} in poll");
