@@ -11,4 +11,10 @@
     <PackageReference Include="Telegram.Bot" Version="22.4.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Files\bot.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
