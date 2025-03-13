@@ -19,18 +19,20 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
         if (exception is RequestException)
             await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
     }
+    private Task UnknownUpdateHandlerAsync(Update update)
+    {
+        logger.LogInformation("Unknown update type: {UpdateType}", update.Type);
+        return Task.CompletedTask;
+    }
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await (update switch
         {
-            // 当用户发送一条新消息时触发。
-            { Message: { } message } => OnMessage(message),
-            // 当用户编辑一条已发送的消息时触发。
-            { EditedMessage: { } message } => OnMessage(message),
             // 表示一个回调查询（Callback Query）。当用户点击一个内联键盘按钮时触发。
             { CallbackQuery: { } callbackQuery } => OnCallbackQuery(callbackQuery),
+
             // 表示一个内联查询（Inline Query）。当用户发起一个内联查询时触发。
             { InlineQuery: { } inlineQuery } => OnInlineQuery(inlineQuery),
             // 表示用户选择的内联查询结果。当用户从内联查询结果中选择一个选项时触发。(未成功触发）
@@ -39,7 +41,12 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
             { Poll: { } poll } => OnPoll(poll),
             // 表示用户对投票的答案。当用户参与投票时触发。
             { PollAnswer: { } pollAnswer } => OnPollAnswer(pollAnswer),
-            
+
+            // 当用户发送一条新消息时触发。
+            { Message: { } message } => OnMessage(message),
+            // 当用户编辑一条已发送的消息时触发。
+            { EditedMessage: { } message } => OnMessage(message),
+
             // ChannelPost: // 当频道发布一条新消息时触发。
             // EditedChannelPost: // 当频道中的一条消息被编辑时触发。
 
@@ -78,24 +85,42 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
     #region 测试命令
     private async Task OnMessage(Message msg)
     {
-        logger.LogInformation("Receive message type: {MessageType}", msg.Type);
-        if (msg.Text is not { } messageText)
-            return;
-
-        Message sentMessage = await (messageText.Split(' ')[0] switch
+        if (msg.From is not { })
         {
-            "/photo" => SendPhoto(msg),
-            "/inline_buttons" => SendInlineKeyboard(msg),
-            "/keyboard" => SendReplyKeyboard(msg),
-            "/remove" => RemoveKeyboard(msg),
-            "/request" => RequestContactAndLocation(msg),
-            "/inline_mode" => StartInlineQuery(msg),
-            "/poll" => SendPoll(msg),
-            "/poll_anonymous" => SendAnonymousPoll(msg),
-            "/throw" => FailingHandler(msg),
-            _ => Usage(msg)
-        });
-        logger.LogInformation("The message was sent with id: {SentMessageId}", sentMessage.Id);
+            logger.LogError("msg.From 参数有误");
+            return;
+        }
+        if (msg.Type == MessageType.Contact)
+        {
+            logger.LogInformation("收到联系信息: {UserId} {FirstName}{LastName} {PhoneNumber}", msg.Contact.UserId, msg.Contact.FirstName, msg.Contact.LastName, msg.Contact.PhoneNumber);
+            //await botClient.SendMessage(msg.Chat, $"收到联系信息，{msg.Contact.UserId} {msg.Contact.FirstName}{msg.Contact.LastName} {msg.Contact.PhoneNumber}");
+
+        }
+        else if (msg.Type == MessageType.Text)
+        {
+            logger.LogInformation("OnMessage MessageType = {MessageType} | MessageText = {MessageText}", msg.Type, msg.Text);
+            if (msg.Text is not { } messageText)
+                return;
+            Message sentMessage = await (messageText.Split(' ')[0] switch
+            {
+                "/photo" => SendPhoto(msg),
+                "/inline_buttons" => SendInlineKeyboard(msg),
+                "/keyboard" => SendReplyKeyboard(msg),
+                "/remove" => RemoveKeyboard(msg),
+                "/request" => RequestContactAndLocation(msg),
+                "/inline_mode" => StartInlineQuery(msg),
+                "/poll" => SendPoll(msg),
+                "/poll_anonymous" => SendAnonymousPoll(msg),
+                "/throw" => FailingHandler(msg),
+                _ => Usage(msg)
+            });
+            logger.LogInformation("The message was sent with id: {SentMessageId}", sentMessage.Id);
+        }
+        else
+        {
+            logger.LogInformation("OnMessage Unknown MessageType = {MessageType}", msg.Type);
+            //await botClient.SendMessage(msg.Chat, $"未知的消息类型，MessageType = {msg.Type}");
+        }
     }
 
     async Task<Message> Usage(Message msg)
@@ -150,23 +175,6 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
         return await bot.SendMessage(msg.Chat, "Who or Where are you?", replyMarkup: replyMarkup);
     }
 
-    async Task<Message> StartInlineQuery(Message msg)
-    {
-        var button = InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("Inline Mode");
-        return await bot.SendMessage(msg.Chat, "Press the button to start Inline Query\n\n" +
-            "(Make sure you enabled Inline Mode in @BotFather)", replyMarkup: new InlineKeyboardMarkup(button));
-    }
-
-    async Task<Message> SendPoll(Message msg)
-    {
-        return await bot.SendPoll(msg.Chat, "Question", PollOptions, isAnonymous: false);
-    }
-
-    async Task<Message> SendAnonymousPoll(Message msg)
-    {
-        return await bot.SendPoll(chatId: msg.Chat, "Question", PollOptions);
-    }
-
     static Task<Message> FailingHandler(Message msg)
     {
         throw new NotImplementedException("FailingHandler");
@@ -182,14 +190,21 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
     }
 
     #region Inline Mode
+    async Task<Message> StartInlineQuery(Message msg)
+    {
+        var button = InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("Inline Mode");
+        return await bot.SendMessage(msg.Chat, "Press the button to start Inline Query\n\n" +
+            "(Make sure you enabled Inline Mode in @BotFather)", replyMarkup: new InlineKeyboardMarkup(button));
+    }
 
     private async Task OnInlineQuery(InlineQuery inlineQuery)
     {
         logger.LogInformation("Received inline query from: {InlineQueryFromId}", inlineQuery.From.Id);
+        string input = inlineQuery.Query;
 
         InlineQueryResult[] results = [ // displayed result
-            new InlineQueryResultArticle("1", "Telegram.Bot", new InputTextMessageContent("hello")),
-            new InlineQueryResultArticle("2", "is the best", new InputTextMessageContent("world"))
+            new InlineQueryResultArticle("1", $"Search {input}", new InputTextMessageContent($"You Search {input}")),
+            new InlineQueryResultArticle("2", $"Local {input}", new InputTextMessageContent($"You Local {input}"))
         ];
         await bot.AnswerInlineQuery(inlineQuery.Id, results, cacheTime: 0, isPersonal: true);
     }
@@ -202,24 +217,28 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
 
     #endregion
 
+    #region 发起投票
+    async Task<Message> SendPoll(Message msg)
+    {
+        return await bot.SendPoll(msg.Chat, "Question", PollOptions, isAnonymous: false);
+    }
+    async Task<Message> SendAnonymousPoll(Message msg)
+    {
+        return await bot.SendPoll(chatId: msg.Chat, "Question", PollOptions);
+    }
     private Task OnPoll(Poll poll)
     {
         logger.LogInformation("Received Poll info: {Question}", poll.Question);
         return Task.CompletedTask;
     }
-
     private async Task OnPollAnswer(PollAnswer pollAnswer)
     {
         var answer = pollAnswer.OptionIds.FirstOrDefault();
-        logger.LogInformation("Received Poll info: {U}={A}", pollAnswer.User.Id, answer);
+        logger.LogInformation("Received Poll info: {U}={A}", pollAnswer.User?.Id, answer);
         var selectedOption = PollOptions[answer];
         if (pollAnswer.User != null)
             await bot.SendMessage(pollAnswer.User.Id, $"You've chosen: {selectedOption.Text} in poll");
     }
+    #endregion
 
-    private Task UnknownUpdateHandlerAsync(Update update)
-    {
-        logger.LogInformation("Unknown update type: {UpdateType}", update.Type);
-        return Task.CompletedTask;
-    }
 }
