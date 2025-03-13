@@ -47,16 +47,20 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
             // 当用户编辑一条已发送的消息时触发。
             { EditedMessage: { } message } => OnMessage(message),
 
-            // ChannelPost: // 当频道发布一条新消息时触发。
-            // EditedChannelPost: // 当频道中的一条消息被编辑时触发。
+            // 当频道发布一条新消息时触发。
+            { ChannelPost: { } message } => OnChannelPost(message),
+            // 当频道中的一条消息被编辑时触发。
+            { EditedChannelPost: { } message } => OnChannelPost(message),
 
             // ShippingQuery: // 表示一个配送查询（Shipping Query）。当用户填写配送信息时触发。
             // PreCheckoutQuery: // 表示一个预结账查询（Pre-Checkout Query）。当用户选择一个商品并发送付款时触发。
 
-            // MyChatMember: // 表示机器人在聊天中的成员状态更新。当机器人在聊天中的权限或状态发生变化时触发。
+            // 表示机器人在聊天中的成员状态更新。当机器人在聊天中的权限或状态发生变化时触发。
+            { MyChatMember: { } chatMemberUpdated } => OnMyChatMember(chatMemberUpdated),
             // 表示聊天成员的更新。当聊天中的某个成员的权限或状态发生变化时触发。
-            //{ ChatMember : { } chatMember } => UnknownUpdateHandlerAsync(chatMember),
-            // ChatJoinRequest 表示用户请求加入聊天。当用户请求加入频道或群组时触发。
+            { ChatMember: { } chatMemberUpdated } => OnChatMember(chatMemberUpdated),
+            // 表示用户请求加入聊天。当用户请求加入频道或群组时触发。
+            { ChatJoinRequest: { } chatJoinRequest } => OnChatJoinRequest(chatJoinRequest),
 
             //// Connect 子业务账户 连接变更
             //{ BusinessConnection: { } dt } => OtherUpdateHandler(dt),
@@ -66,9 +70,9 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
             //{ DeletedBusinessMessages: { } dt } => OtherUpdateHandler(dt),
 
             //// 用户更改了对消息的回应
-            //{ MessageReaction: { } dt } => OtherUpdateHandler(dt),
+            { MessageReaction: { } messageReactionUpdated } => OnMessageReaction(messageReactionUpdated),
             //// 更改了对带有匿名反应的消息的回应。机器人必须是聊天中的管理员，并且必须在allowed_updates列表中明确指定接收这些更新
-            //{ MessageReactionCount: { } dt } => OtherUpdateHandler(dt),
+            { MessageReactionCount: { } messageReactionCountUpdated } => OnMessageReactionCount(messageReactionCountUpdated),
 
             //// 用户购买了由机器人在非渠道聊天中发送的非空负载的付费媒体
             //{ PurchasedPaidMedia: { } dt } => OtherUpdateHandler(dt),
@@ -82,14 +86,50 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
         });
     }
 
+    #region 更多Update处理逻辑
+    private async Task OnChannelPost(Message msg)
+    {
+        if (msg.Type == MessageType.Text)
+        {
+            logger.LogInformation("OnChannelPost MessageType = {MessageType} | MessageText = {MessageText}", msg.Type, msg.Text);
+            await bot.SendMessage(msg.Chat, $"OnChannelPost MessageText = {msg.Text}");
+        }
+        else
+        {
+            logger.LogInformation("OnChannelPost Unknown MessageType = {MessageType}", msg.Type);
+            await bot.SendMessage(msg.Chat, $"未知的频道消息类型，MessageType = {msg.Type}");
+        }
+    }
+    private async Task OnMyChatMember(ChatMemberUpdated chatMemberUpdated)
+    {
+        logger.LogInformation("OnMyChatMember");
+        await bot.SendMessage(chatMemberUpdated.Chat, $"OnMyChatMember {chatMemberUpdated.OldChatMember.User.Username} ==》 {chatMemberUpdated.NewChatMember.User.Username}");
+    }
+    private async Task OnChatMember(ChatMemberUpdated chatMemberUpdated)
+    {
+        logger.LogInformation("OnChatMember");
+        await bot.SendMessage(chatMemberUpdated.Chat, $"OnChatMember {chatMemberUpdated.OldChatMember.User.Username} ==》 {chatMemberUpdated.NewChatMember.User.Username}");
+    }
+    private async Task OnChatJoinRequest(ChatJoinRequest chatJoinRequest)
+    {
+        logger.LogInformation("OnChatJoinRequest");
+        await bot.SendMessage(chatJoinRequest.Chat, $"OnChatJoinRequest {chatJoinRequest.UserChatId} ==》 {chatJoinRequest.InviteLink}");
+    }
+    private async Task OnMessageReaction(MessageReactionUpdated messageReactionUpdated)
+    {
+        logger.LogInformation("OnMessageReaction");
+        await bot.SendMessage(messageReactionUpdated.Chat, $"OnMessageReaction {messageReactionUpdated.OldReaction.Length} ==》 {messageReactionUpdated.NewReaction.Length}");
+    }
+    private async Task OnMessageReactionCount(MessageReactionCountUpdated messageReactionCountUpdated)
+    {
+        logger.LogInformation("OnMessageReactionCount");
+        await bot.SendMessage(messageReactionCountUpdated.Chat, $"OnMessageReactionCount {messageReactionCountUpdated.Reactions.Length}");
+    }
+    #endregion
+
     #region 测试命令
     private async Task OnMessage(Message msg)
     {
-        if (msg.From is not { })
-        {
-            logger.LogError("msg.From 参数有误");
-            return;
-        }
         if (msg.Type == MessageType.Contact)
         {
             logger.LogInformation("收到联系信息: {UserId} {FirstName}{LastName} {PhoneNumber}", msg.Contact.UserId, msg.Contact.FirstName, msg.Contact.LastName, msg.Contact.PhoneNumber);
@@ -119,7 +159,7 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
         else
         {
             logger.LogInformation("OnMessage Unknown MessageType = {MessageType}", msg.Type);
-            //await botClient.SendMessage(msg.Chat, $"未知的消息类型，MessageType = {msg.Type}");
+            await bot.SendMessage(msg.Chat, $"未知的消息类型，MessageType = {msg.Type}");
         }
     }
 
