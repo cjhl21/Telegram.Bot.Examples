@@ -92,38 +92,38 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
         if (msg.Type == MessageType.Text)
         {
             logger.LogInformation("OnChannelPost MessageType = {MessageType} | MessageText = {MessageText}", msg.Type, msg.Text);
-            await bot.SendMessage(msg.Chat, $"OnChannelPost MessageText = {msg.Text}");
+            //await bot.SendMessage(msg.Chat, $"OnChannelPost MessageText = {msg.Text}");
         }
         else
         {
             logger.LogInformation("OnChannelPost Unknown MessageType = {MessageType}", msg.Type);
-            await bot.SendMessage(msg.Chat, $"未知的频道消息类型，MessageType = {msg.Type}");
+            //await bot.SendMessage(msg.Chat, $"未知的频道消息类型，MessageType = {msg.Type}");
         }
     }
     private async Task OnMyChatMember(ChatMemberUpdated chatMemberUpdated)
     {
         logger.LogInformation("OnMyChatMember");
-        await bot.SendMessage(chatMemberUpdated.Chat, $"OnMyChatMember {chatMemberUpdated.OldChatMember.User.Username} ==》 {chatMemberUpdated.NewChatMember.User.Username}");
+        //await bot.SendMessage(chatMemberUpdated.Chat, $"OnMyChatMember {chatMemberUpdated.OldChatMember.User.Username} ==》 {chatMemberUpdated.NewChatMember.User.Username}");
     }
     private async Task OnChatMember(ChatMemberUpdated chatMemberUpdated)
     {
         logger.LogInformation("OnChatMember");
-        await bot.SendMessage(chatMemberUpdated.Chat, $"OnChatMember {chatMemberUpdated.OldChatMember.User.Username} ==》 {chatMemberUpdated.NewChatMember.User.Username}");
+        //await bot.SendMessage(chatMemberUpdated.Chat, $"OnChatMember {chatMemberUpdated.OldChatMember.User.Username} ==》 {chatMemberUpdated.NewChatMember.User.Username}");
     }
     private async Task OnChatJoinRequest(ChatJoinRequest chatJoinRequest)
     {
         logger.LogInformation("OnChatJoinRequest");
-        await bot.SendMessage(chatJoinRequest.Chat, $"OnChatJoinRequest {chatJoinRequest.UserChatId} ==》 {chatJoinRequest.InviteLink}");
+        //await bot.SendMessage(chatJoinRequest.Chat, $"OnChatJoinRequest {chatJoinRequest.UserChatId} ==》 {chatJoinRequest.InviteLink}");
     }
     private async Task OnMessageReaction(MessageReactionUpdated messageReactionUpdated)
     {
         logger.LogInformation("OnMessageReaction");
-        await bot.SendMessage(messageReactionUpdated.Chat, $"OnMessageReaction {messageReactionUpdated.OldReaction.Length} ==》 {messageReactionUpdated.NewReaction.Length}");
+        //await bot.SendMessage(messageReactionUpdated.Chat, $"OnMessageReaction {messageReactionUpdated.OldReaction.Length} ==》 {messageReactionUpdated.NewReaction.Length}");
     }
     private async Task OnMessageReactionCount(MessageReactionCountUpdated messageReactionCountUpdated)
     {
         logger.LogInformation("OnMessageReactionCount");
-        await bot.SendMessage(messageReactionCountUpdated.Chat, $"OnMessageReactionCount {messageReactionCountUpdated.Reactions.Length}");
+        //await bot.SendMessage(messageReactionCountUpdated.Chat, $"OnMessageReactionCount {messageReactionCountUpdated.Reactions.Length}");
     }
     #endregion
 
@@ -152,6 +152,7 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
                 "/poll" => SendPoll(msg),
                 "/poll_anonymous" => SendAnonymousPoll(msg),
                 "/throw" => FailingHandler(msg),
+                "/test" => DoTest(msg),
                 _ => Usage(msg)
             });
             logger.LogInformation("The message was sent with id: {SentMessageId}", sentMessage.Id);
@@ -159,10 +160,14 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
         else
         {
             logger.LogInformation("OnMessage Unknown MessageType = {MessageType}", msg.Type);
-            await bot.SendMessage(msg.Chat, $"未知的消息类型，MessageType = {msg.Type}");
+            //await bot.SendMessage(msg.Chat, $"未知的消息类型，MessageType = {msg.Type}");
         }
     }
 
+    async Task<Message> DoTest(Message msg)
+    {
+        return await bot.SendMessage(msg.Chat, "测试", parseMode: ParseMode.Html, replyMarkup: new ReplyKeyboardRemove());
+    }
     async Task<Message> Usage(Message msg)
     {
         const string usage = """
@@ -176,6 +181,7 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
                 /poll           - send a poll
                 /poll_anonymous - send an anonymous poll
                 /throw          - what happens if handler fails
+                /test           - do tg bot test
             """;
         return await bot.SendMessage(msg.Chat, usage, parseMode: ParseMode.Html, replyMarkup: new ReplyKeyboardRemove());
     }
