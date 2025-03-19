@@ -12,6 +12,7 @@ using System;
 using Telegram.Bot.Types.Passport;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
+using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace Haicao.WebApplication.Controllers;
 
@@ -170,6 +171,84 @@ public class BotController(ILogger<BotController> logger, IOptions<BotConfigurat
                 mMsg.WebAppData = message.WebAppData is null ? "" : JsonConvert.SerializeObject(message.WebAppData);
                 mMsg.ReplyMarkup = message.ReplyMarkup is null ? "" : JsonConvert.SerializeObject(message.ReplyMarkup);
                 tgUpdateService.Insert(mMsg);
+            }
+            #endregion
+
+            #region tgUser
+            if (update.Message?.From is not null)
+            {
+                User user = update.Message.From;
+                tgUser mUser = tgUpdateService.Query<tgUser>(t => t.Id == user.Id).First();
+                if (mUser != null && mUser.FCreateTime != null)
+                {
+                    mUser.FUpdateTime = DateTime.Now;
+                    mUser.IsBot = user.IsBot;
+                    mUser.FirstName = user.FirstName;
+                    mUser.LastName = user.LastName;
+                    mUser.Username = user.Username;
+                    mUser.LanguageCode = user.LanguageCode;
+                    mUser.IsPremium = user.IsPremium;
+                    mUser.AddedToAttachmentMenu = user.AddedToAttachmentMenu;
+                    mUser.CanJoinGroups = user.CanJoinGroups;
+                    mUser.CanReadAllGroupMessages = user.CanReadAllGroupMessages;
+                    mUser.SupportsInlineQueries = user.SupportsInlineQueries;
+                    mUser.CanConnectToBusiness = user.CanConnectToBusiness;
+                    mUser.HasMainWebApp = user.HasMainWebApp;
+                    tgUpdateService.Update(mUser);
+                }
+                else
+                {
+                    mUser = new tgUser();
+                    mUser.Id = user.Id;
+                    mUser.FCreateTime = DateTime.Now;
+                    mUser.IsBot = user.IsBot;
+                    mUser.FirstName = user.FirstName;
+                    mUser.LastName = user.LastName;
+                    mUser.Username = user.Username;
+                    mUser.LanguageCode = user.LanguageCode;
+                    mUser.IsPremium = user.IsPremium;
+                    mUser.AddedToAttachmentMenu = user.AddedToAttachmentMenu;
+                    mUser.CanJoinGroups = user.CanJoinGroups;
+                    mUser.CanReadAllGroupMessages = user.CanReadAllGroupMessages;
+                    mUser.SupportsInlineQueries = user.SupportsInlineQueries;
+                    mUser.CanConnectToBusiness = user.CanConnectToBusiness;
+                    mUser.HasMainWebApp = user.HasMainWebApp;
+                    tgUpdateService.Insert(mUser);
+                }
+            }
+            #endregion
+
+            #region tgChat
+            if (update.Message?.Chat is not null)
+            {
+                Chat chat = update.Message.Chat;
+                tgChat mChat = tgUpdateService.Query<tgChat>(t => t.Id == chat.Id).First();
+                if (mChat != null && mChat.FCreateTime != null)
+                {
+                    mChat.FUpdateTime = DateTime.Now;
+                    mChat.FType = chat.Type.ToString();
+                    mChat.Type = (int)chat.Type;
+                    mChat.Title = chat.Title;
+                    mChat.FirstName = chat.FirstName;
+                    mChat.LastName = chat.LastName;
+                    mChat.Username = chat.Username;
+                    mChat.IsForum = chat.IsForum;
+                    tgUpdateService.Update(mChat);
+                }
+                else
+                {
+                    mChat = new tgChat();
+                    mChat.Id = chat.Id;
+                    mChat.FCreateTime = DateTime.Now;
+                    mChat.FType = chat.Type.ToString();
+                    mChat.Type = (int)chat.Type;
+                    mChat.Title = chat.Title;
+                    mChat.FirstName = chat.FirstName;
+                    mChat.LastName = chat.LastName;
+                    mChat.Username = chat.Username;
+                    mChat.IsForum = chat.IsForum;
+                    tgUpdateService.Insert(mChat);
+                }
             }
             #endregion
 
