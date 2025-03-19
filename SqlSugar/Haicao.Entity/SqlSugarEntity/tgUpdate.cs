@@ -16,9 +16,9 @@ namespace Haicao.Entity.SqlSugarEntity
            /// <summary>
            /// Desc:
            /// Default:
-           /// Nullable:False
+           /// Nullable:True
            /// </summary>           
-           public int FID {get;set;}
+           public string FBot {get;set;}
 
            /// <summary>
            /// Desc:
@@ -32,14 +32,21 @@ namespace Haicao.Entity.SqlSugarEntity
            /// Default:
            /// Nullable:True
            /// </summary>           
-           public int? Type {get;set;}
+           public string FType {get;set;}
 
            /// <summary>
            /// Desc:
            /// Default:
            /// Nullable:True
            /// </summary>           
-           public int? Id {get;set;}
+           public int? Type {get;set;}
+
+           /// <summary>
+           /// Desc:
+           /// Default:
+           /// Nullable:False
+           /// </summary>           
+           public int Id {get;set;}
 
            /// <summary>
            /// Desc:
