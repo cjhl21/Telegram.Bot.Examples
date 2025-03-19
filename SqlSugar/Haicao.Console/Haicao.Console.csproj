@@ -7,4 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Haicao.Entity\Haicao.Entity.csproj" />
+    <ProjectReference Include="..\Haicao.Services\Haicao.Services.csproj" />
+  </ItemGroup>
+
 </Project>

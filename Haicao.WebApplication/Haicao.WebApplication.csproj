@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SqlSugar\Haicao.Services\Haicao.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Files\bot.gif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
