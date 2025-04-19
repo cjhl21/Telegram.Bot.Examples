@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using SqlSugar;
 
 namespace Haicao.Entity.SqlSugarEntity
 {
@@ -41,12 +42,13 @@ namespace Haicao.Entity.SqlSugarEntity
            /// </summary>           
            public int? Type {get;set;}
 
-           /// <summary>
-           /// Desc:
-           /// Default:
-           /// Nullable:False
-           /// </summary>           
-           public int Id {get;set;}
+        /// <summary>
+        /// Desc:
+        /// Default:
+        /// Nullable:False
+        /// </summary>
+        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        public int Id {get;set;}
 
            /// <summary>
            /// Desc:

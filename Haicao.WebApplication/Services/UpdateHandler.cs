@@ -138,6 +138,11 @@ public class UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger
         }
         else if (msg.Type == MessageType.Text)
         {
+            // 群组和频道 里面的消息不处理
+            if (msg.Chat.Type is ChatType.Group or ChatType.Supergroup or ChatType.Channel)
+            {
+                return;
+            }
             logger.LogInformation("OnMessage MessageType = {MessageType} | MessageText = {MessageText}", msg.Type, msg.Text);
             if (msg.Text is not { } messageText)
                 return;
